@@ -178,7 +178,7 @@ export class GitHubAwarenessAssessment {
       languages: repoData.languages.edges.map((e: any) => e.node.name),
       topics: repoData.repositoryTopics.edges.map((e: any) => e.node.topic.name),
       dependencies: repoData.dependencyGraphManifests?.totalCount || 0,
-      contributors: repoData.mentionableUsers?.totalCount || 0,
+      contributors: repoData.mentionableUsers?.totalCount || 0, // Note: Uses mentionableUsers as proxy for contributors
       issues: repoData.issues.totalCount,
       pullRequests: repoData.pullRequests.totalCount,
       stars: repoData.stargazerCount,
