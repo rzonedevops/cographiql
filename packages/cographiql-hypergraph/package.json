@@ -10,7 +10,8 @@
     "lint": "eslint src --ext .ts,.tsx",
     "dev": "tsc --watch",
     "assessment": "node dist/assessment/assessment-runner.js",
-    "examples": "node dist/examples/assessment/run-examples.js"
+    "examples": "node dist/examples/assessment/run-examples.js",
+    "demo": "node demo.js"
   },
   "keywords": [
     "graphql",
