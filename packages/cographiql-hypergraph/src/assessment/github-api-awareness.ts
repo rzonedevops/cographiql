@@ -142,11 +142,6 @@ export class GitHubAwarenessAssessment {
           hasDiscussionsEnabled
           defaultBranchRef {
             name
-          }
-          refs(refPrefix: "refs/heads/") {
-            totalCount
-          }
-          defaultBranchRef {
             target {
               ... on Commit {
                 history {
@@ -154,6 +149,9 @@ export class GitHubAwarenessAssessment {
                 }
               }
             }
+          }
+          refs(refPrefix: "refs/heads/") {
+            totalCount
           }
           releases {
             totalCount

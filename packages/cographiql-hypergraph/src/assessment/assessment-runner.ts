@@ -4,7 +4,9 @@
  * Demonstrates GitHub API awareness assessment and GraphQL vs HyperGraphQL benchmarking
  */
 
-import { GitHubAwarenessAssessment } from './github-api-awareness';
+import * as fs from 'fs';
+import * as path from 'path';
+import { GitHubAwarenessAssessment, AwarenessResults } from './github-api-awareness';
 import { GraphQLBenchmark, GRAPHQL_VS_HYPERGRAPHQL_EXPLANATION } from './graphql-benchmark';
 
 /**
@@ -16,15 +18,22 @@ export async function runCompleteAssessment(githubToken: string, owner: string, 
   console.log('='.repeat(80));
   console.log('');
 
+  const outputDir = path.join(__dirname, '../../output');
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
   // Part 1: GitHub API Awareness Assessment
   console.log('PART 1: GitHub API Awareness Assessment');
   console.log('-'.repeat(80));
   console.log('');
 
   const awarenessAssessment = new GitHubAwarenessAssessment({ token: githubToken });
+  let results: AwarenessResults | undefined;
+  let reportPath: string | undefined;
 
   try {
-    const results = await awarenessAssessment.runAssessment(
+    results = await awarenessAssessment.runAssessment(
       owner,
       repo,
       true,  // Include org assessment
@@ -34,15 +43,7 @@ export async function runCompleteAssessment(githubToken: string, owner: string, 
     const report = awarenessAssessment.generateReport(results);
     console.log(report);
     
-    // Also save to file
-    const fs = require('fs');
-    const path = require('path');
-    const outputDir = path.join(__dirname, '../../output');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-    
-    const reportPath = path.join(outputDir, 'github-awareness-report.md');
+    reportPath = path.join(outputDir, 'github-awareness-report.md');
     fs.writeFileSync(reportPath, report);
     console.log(`\n✅ Awareness report saved to: ${reportPath}\n`);
   } catch (error) {
@@ -64,14 +65,6 @@ export async function runCompleteAssessment(githubToken: string, owner: string, 
   const benchmarkReport = benchmark.generateReport(benchmarkResults);
   console.log(benchmarkReport);
 
-  // Save benchmark report
-  const fs = require('fs');
-  const path = require('path');
-  const outputDir = path.join(__dirname, '../../output');
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-  
   const benchmarkPath = path.join(outputDir, 'graphql-benchmark-report.md');
   fs.writeFileSync(benchmarkPath, benchmarkReport);
   console.log(`\n✅ Benchmark report saved to: ${benchmarkPath}\n`);
@@ -94,7 +87,7 @@ export async function runCompleteAssessment(githubToken: string, owner: string, 
   console.log('='.repeat(80));
   console.log('');
   
-  if (results) {
+  if (results && reportPath) {
     console.log('Summary:');
     console.log(`  • GitHub API queries executed: ${results.queriesExecuted}`);
     console.log(`  • Total query time: ${results.queryTime}ms`);
@@ -106,12 +99,18 @@ export async function runCompleteAssessment(githubToken: string, owner: string, 
     console.log(`  2. ${benchmarkPath}`);
     console.log(`  3. ${explanationPath}`);
     console.log('');
+  } else {
+    console.log('Partial results:');
+    console.log(`  • Benchmark completed successfully`);
+    console.log(`  • Benchmark iterations: ${benchmarkResults.graphql[0]?.iterations || 0}`);
+    console.log(`  • Reports generated: ${reportPath ? '3' : '2 (awareness assessment failed)'}`);
+    console.log('');
   }
 
   return {
     awarenessResults: results,
     benchmarkResults,
-    outputFiles: [reportPath, benchmarkPath, explanationPath],
+    outputFiles: [reportPath, benchmarkPath, explanationPath].filter(Boolean) as string[],
   };
 }
 
