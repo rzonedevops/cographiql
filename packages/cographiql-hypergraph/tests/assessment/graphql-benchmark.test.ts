@@ -2,7 +2,7 @@
  * Tests for GraphQL Benchmark
  */
 
-import { GraphQLBenchmark } from '../src/assessment/graphql-benchmark';
+import { GraphQLBenchmark } from '../../src/assessment/graphql-benchmark';
 
 describe('GraphQLBenchmark', () => {
   let benchmark: GraphQLBenchmark;

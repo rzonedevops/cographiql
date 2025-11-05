@@ -2,7 +2,7 @@
  * Tests for GitHub API Awareness Assessment
  */
 
-import { GitHubAwarenessAssessment } from '../src/assessment/github-api-awareness';
+import { GitHubAwarenessAssessment } from '../../src/assessment/github-api-awareness';
 
 describe('GitHubAwarenessAssessment', () => {
   let assessment: GitHubAwarenessAssessment;

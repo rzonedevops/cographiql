@@ -285,9 +285,6 @@ interface BenchmarkMetrics {
   queryTime: number;           // Average query time in ms
   throughput: number;          // Queries per second
   memoryUsage: number;         // Memory delta in bytes
-  cpuUsage: number;            // CPU usage percentage
-  networkLatency: number;      // Network latency in ms
-  dataSize: number;            // Response data size in bytes
 }
 ```
 

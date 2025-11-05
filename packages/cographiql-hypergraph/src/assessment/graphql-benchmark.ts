@@ -8,9 +8,6 @@ export interface BenchmarkMetrics {
   queryTime: number;
   throughput: number;
   memoryUsage: number;
-  cpuUsage: number;
-  networkLatency: number;
-  dataSize: number;
 }
 
 export interface GraphQLBenchmark {
@@ -71,9 +68,6 @@ export class GraphQLBenchmark {
         queryTime: avgTime,
         throughput: (this.iterations / totalTime) * 1000, // queries per second
         memoryUsage: memoryEnd - memoryStart,
-        cpuUsage: 0, // Would need CPU profiling
-        networkLatency: 0, // Would need network profiling
-        dataSize: 0,
       },
       features: [
         'Single endpoint',
@@ -117,9 +111,6 @@ export class GraphQLBenchmark {
         queryTime: avgTime,
         throughput: (this.iterations / totalTime) * 1000,
         memoryUsage: memoryEnd - memoryStart,
-        cpuUsage: 0,
-        networkLatency: 0,
-        dataSize: 0,
       },
       features: [
         'Distributed data sources',

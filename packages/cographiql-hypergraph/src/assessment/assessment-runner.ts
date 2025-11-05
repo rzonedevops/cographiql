@@ -93,17 +93,20 @@ export async function runCompleteAssessment(githubToken: string, owner: string, 
   console.log('Assessment Complete!');
   console.log('='.repeat(80));
   console.log('');
-  console.log('Summary:');
-  console.log(`  • GitHub API queries executed: ${results.queriesExecuted}`);
-  console.log(`  • Total query time: ${results.queryTime}ms`);
-  console.log(`  • Benchmark iterations: ${benchmarkResults.graphql[0]?.iterations || 0}`);
-  console.log(`  • Reports generated: 3`);
-  console.log('');
-  console.log('Output files:');
-  console.log(`  1. ${reportPath}`);
-  console.log(`  2. ${benchmarkPath}`);
-  console.log(`  3. ${explanationPath}`);
-  console.log('');
+  
+  if (results) {
+    console.log('Summary:');
+    console.log(`  • GitHub API queries executed: ${results.queriesExecuted}`);
+    console.log(`  • Total query time: ${results.queryTime}ms`);
+    console.log(`  • Benchmark iterations: ${benchmarkResults.graphql[0]?.iterations || 0}`);
+    console.log(`  • Reports generated: 3`);
+    console.log('');
+    console.log('Output files:');
+    console.log(`  1. ${reportPath}`);
+    console.log(`  2. ${benchmarkPath}`);
+    console.log(`  3. ${explanationPath}`);
+    console.log('');
+  }
 
   return {
     awarenessResults: results,

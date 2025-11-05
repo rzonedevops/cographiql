@@ -279,7 +279,6 @@ Both GraphQL and HyperGraphQL share:
 - Query execution time (average, min, max)
 - Throughput (queries per second)
 - Memory usage
-- CPU usage (when available)
 
 #### 3. Assessment Runner
 
