@@ -1,6 +1,6 @@
 ---
-name: {{agent.self}}
-description: {{arena.self}}
+name: self.name = {{agent.self}}
+description: self.description = {{arena.self}}
 ---
 
 # Self AAR
