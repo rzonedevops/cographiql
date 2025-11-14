@@ -33,6 +33,9 @@ export {
   createCognitiveMirror,
 } from './self-awareness/cognitive-mirror';
 
+// Universal Kernel Generator
+export * from './kernel';
+
 // UI components
 export { CogGraphiQL } from './ui/CogGraphiQL';
 export { HypergraphVisualizer } from './ui/HypergraphVisualizer';
