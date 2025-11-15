@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ontogenesis Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .metric-label {
+            font-weight: bold;
+        }
+
+        .metric-value {
+            font-family: 'Courier New', monospace;
+        }
+
+        .visualization {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .generation-row {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .generation-label {
+            width: 100px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .kernel-grid {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+
+        .kernel {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .kernel:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .kernel.best {
+            border: 3px solid gold;
+            box-shadow: 0 0 15px gold;
+        }
+
+        .kernel-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            z-index: 1000;
+            display: none;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .stage-embryonic { background: #FF6B6B; }
+        .stage-juvenile { background: #4ECDC4; }
+        .stage-mature { background: #45B7D1; }
+        .stage-senescent { background: #95A5A6; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧬 Ontogenesis Visualization</h1>
+            <p class="subtitle">Self-Generating, Evolving Kernels</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>📊 Population Metrics</h2>
+                <div class="metric">
+                    <span class="metric-label">Generation:</span>
+                    <span class="metric-value" id="generation">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Population Size:</span>
+                    <span class="metric-value" id="population-size">20</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Average Fitness:</span>
+                    <span class="metric-value" id="avg-fitness">0.0000</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Best Fitness:</span>
+                    <span class="metric-value" id="best-fitness">0.0000</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Diversity:</span>
+                    <span class="metric-value" id="diversity">0.0000</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Evolution Progress</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="total-kernels">0</div>
+                        <div class="stat-label">Total Kernels</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="mutations">0</div>
+                        <div class="stat-label">Mutations</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="crossovers">0</div>
+                        <div class="stat-label">Crossovers</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔬 Development Stages</h2>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color stage-embryonic"></div>
+                        <span>Embryonic</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color stage-juvenile"></div>
+                        <span>Juvenile</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color stage-mature"></div>
+                        <span>Mature</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color stage-senescent"></div>
+                        <span>Senescent</span>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="stage-embryonic">0</div>
+                        <div class="stat-label">Embryonic</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="stage-juvenile">0</div>
+                        <div class="stat-label">Juvenile</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="stage-mature">0</div>
+                        <div class="stat-label">Mature</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="stage-senescent">0</div>
+                        <div class="stat-label">Senescent</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <h2>🧬 Generational Lineage</h2>
+            <div class="controls">
+                <button id="start-btn">▶️ Start Evolution</button>
+                <button id="step-btn">⏭️ Next Generation</button>
+                <button id="reset-btn">🔄 Reset</button>
+                <button id="speed-btn">⚡ Speed: Normal</button>
+            </div>
+            <div id="generations-container"></div>
+        </div>
+
+        <div class="kernel-tooltip" id="tooltip"></div>
+    </div>
+
+    <script>
+        // Simulation state
+        let state = {
+            generation: 0,
+            maxGenerations: 20,
+            populationSize: 20,
+            generations: [],
+            running: false,
+            speed: 1000, // ms
+            totalMutations: 0,
+            totalCrossovers: 0
+        };
+
+        // Generate random kernel with fitness
+        function createKernel(generation) {
+            const stages = ['embryonic', 'juvenile', 'mature', 'senescent'];
+            const fitness = Math.random() * 0.4 + 0.3; // 0.3-0.7 initially
+            return {
+                id: `k${generation}-${Math.random().toString(36).substr(2, 9)}`,
+                generation,
+                fitness,
+                stage: stages[Math.floor(Math.random() * stages.length)],
+                age: Math.floor(Math.random() * 10)
+            };
+        }
+
+        // Initialize population
+        function initializePopulation() {
+            const kernels = [];
+            for (let i = 0; i < state.populationSize; i++) {
+                kernels.push(createKernel(0));
+            }
+            state.generations = [{ generation: 0, kernels }];
+            updateDisplay();
+        }
+
+        // Evolve to next generation
+        function evolve() {
+            const current = state.generations[state.generations.length - 1];
+            const nextGen = state.generation + 1;
+            
+            // Sort by fitness
+            const sorted = [...current.kernels].sort((a, b) => b.fitness - a.fitness);
+            
+            // Elite
+            const elite = sorted.slice(0, Math.floor(state.populationSize * 0.2));
+            
+            // Generate offspring
+            const offspring = [];
+            while (offspring.length < state.populationSize - elite.length) {
+                const parent1 = sorted[Math.floor(Math.random() * sorted.length)];
+                const parent2 = sorted[Math.floor(Math.random() * sorted.length)];
+                
+                const child = createKernel(nextGen);
+                
+                // Crossover
+                if (Math.random() < 0.7) {
+                    child.fitness = (parent1.fitness + parent2.fitness) / 2;
+                    state.totalCrossovers++;
+                } else {
+                    child.fitness = parent1.fitness;
+                }
+                
+                // Mutation
+                if (Math.random() < 0.1) {
+                    child.fitness += (Math.random() - 0.5) * 0.1;
+                    state.totalMutations++;
+                }
+                
+                // Improvement over generations
+                child.fitness = Math.min(1.0, child.fitness + Math.random() * 0.02);
+                
+                offspring.push(child);
+            }
+            
+            const nextKernels = [...elite, ...offspring];
+            state.generations.push({ generation: nextGen, kernels: nextKernels });
+            state.generation = nextGen;
+            
+            updateDisplay();
+        }
+
+        // Update display
+        function updateDisplay() {
+            const current = state.generations[state.generations.length - 1];
+            
+            // Metrics
+            document.getElementById('generation').textContent = state.generation;
+            document.getElementById('population-size').textContent = current.kernels.length;
+            
+            const avgFitness = current.kernels.reduce((sum, k) => sum + k.fitness, 0) / current.kernels.length;
+            const bestFitness = Math.max(...current.kernels.map(k => k.fitness));
+            const diversity = calculateDiversity(current.kernels);
+            
+            document.getElementById('avg-fitness').textContent = avgFitness.toFixed(4);
+            document.getElementById('best-fitness').textContent = bestFitness.toFixed(4);
+            document.getElementById('diversity').textContent = diversity.toFixed(4);
+            
+            // Progress
+            const progress = (state.generation / state.maxGenerations) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-fill').textContent = Math.round(progress) + '%';
+            
+            // Stats
+            document.getElementById('total-kernels').textContent = 
+                state.generations.reduce((sum, g) => sum + g.kernels.length, 0);
+            document.getElementById('mutations').textContent = state.totalMutations;
+            document.getElementById('crossovers').textContent = state.totalCrossovers;
+            
+            // Stage counts
+            const stages = { embryonic: 0, juvenile: 0, mature: 0, senescent: 0 };
+            current.kernels.forEach(k => stages[k.stage]++);
+            Object.keys(stages).forEach(stage => {
+                document.getElementById(`stage-${stage}`).textContent = stages[stage];
+            });
+            
+            // Visualization
+            renderGenerations();
+        }
+
+        // Calculate diversity
+        function calculateDiversity(kernels) {
+            if (kernels.length < 2) return 0;
+            let totalDistance = 0;
+            let count = 0;
+            for (let i = 0; i < kernels.length; i++) {
+                for (let j = i + 1; j < kernels.length; j++) {
+                    totalDistance += Math.abs(kernels[i].fitness - kernels[j].fitness);
+                    count++;
+                }
+            }
+            return count > 0 ? totalDistance / count : 0;
+        }
+
+        // Render generations visualization
+        function renderGenerations() {
+            const container = document.getElementById('generations-container');
+            container.innerHTML = '';
+            
+            // Show last 10 generations
+            const recentGens = state.generations.slice(-10);
+            
+            recentGens.forEach(gen => {
+                const row = document.createElement('div');
+                row.className = 'generation-row';
+                
+                const label = document.createElement('div');
+                label.className = 'generation-label';
+                label.textContent = `Gen ${gen.generation}:`;
+                row.appendChild(label);
+                
+                const grid = document.createElement('div');
+                grid.className = 'kernel-grid';
+                
+                const bestKernel = gen.kernels.reduce((best, k) => k.fitness > best.fitness ? k : best);
+                
+                gen.kernels.forEach(kernel => {
+                    const dot = document.createElement('div');
+                    dot.className = 'kernel stage-' + kernel.stage;
+                    if (kernel === bestKernel) {
+                        dot.classList.add('best');
+                    }
+                    
+                    // Color by fitness
+                    const hue = kernel.fitness * 120; // 0 (red) to 120 (green)
+                    dot.style.background = `hsl(${hue}, 70%, 50%)`;
+                    
+                    // Tooltip
+                    dot.addEventListener('mouseenter', (e) => {
+                        const tooltip = document.getElementById('tooltip');
+                        tooltip.innerHTML = `
+                            <strong>Kernel ${kernel.id.substr(0, 10)}...</strong><br>
+                            Fitness: ${kernel.fitness.toFixed(4)}<br>
+                            Stage: ${kernel.stage}<br>
+                            Age: ${kernel.age}<br>
+                            Generation: ${kernel.generation}
+                        `;
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = e.pageX + 10 + 'px';
+                        tooltip.style.top = e.pageY + 10 + 'px';
+                    });
+                    
+                    dot.addEventListener('mouseleave', () => {
+                        document.getElementById('tooltip').style.display = 'none';
+                    });
+                    
+                    grid.appendChild(dot);
+                });
+                
+                row.appendChild(grid);
+                container.appendChild(row);
+            });
+        }
+
+        // Controls
+        document.getElementById('start-btn').addEventListener('click', () => {
+            state.running = !state.running;
+            document.getElementById('start-btn').textContent = state.running ? '⏸️ Pause' : '▶️ Start Evolution';
+            
+            if (state.running) {
+                runEvolution();
+            }
+        });
+
+        document.getElementById('step-btn').addEventListener('click', () => {
+            if (state.generation < state.maxGenerations) {
+                evolve();
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            state.generation = 0;
+            state.running = false;
+            state.totalMutations = 0;
+            state.totalCrossovers = 0;
+            document.getElementById('start-btn').textContent = '▶️ Start Evolution';
+            initializePopulation();
+        });
+
+        document.getElementById('speed-btn').addEventListener('click', function() {
+            const speeds = [1000, 500, 250];
+            const labels = ['Normal', 'Fast', 'Very Fast'];
+            const currentIdx = speeds.indexOf(state.speed);
+            const nextIdx = (currentIdx + 1) % speeds.length;
+            state.speed = speeds[nextIdx];
+            this.textContent = `⚡ Speed: ${labels[nextIdx]}`;
+        });
+
+        // Run evolution loop
+        function runEvolution() {
+            if (!state.running) return;
+            
+            if (state.generation < state.maxGenerations) {
+                evolve();
+                setTimeout(runEvolution, state.speed);
+            } else {
+                state.running = false;
+                document.getElementById('start-btn').textContent = '▶️ Start Evolution';
+                alert('Evolution complete! Max generations reached.');
+            }
+        }
+
+        // Initialize
+        initializePopulation();
+    </script>
+</body>
+</html>

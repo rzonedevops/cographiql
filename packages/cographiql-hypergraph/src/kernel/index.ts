@@ -15,6 +15,10 @@ export { GripOptimizer } from './grip-optimizer';
 // Types
 export * from './types';
 
+// Ontogenesis (self-generating, evolving kernels)
+export { OntogenesisEngine } from './ontogenesis';
+export * from './ontogenesis-types';
+
 // Convenience functions
 import { UniversalKernelGenerator } from './generator';
 import {
@@ -76,3 +80,51 @@ export const exportKernel = (
   kernel: GeneratedKernel,
   format: 'json' | 'ggml' | 'scheme'
 ): string => UniversalKernelGenerator.export(kernel, format);
+
+/**
+ * Ontogenesis convenience functions
+ */
+import { OntogenesisEngine } from './ontogenesis';
+import {
+  OntogeneticKernel,
+  OntogenesisConfig,
+  KernelPopulation,
+} from './ontogenesis-types';
+
+/**
+ * Initialize kernel with ontogenetic capabilities
+ */
+export const initializeOntogeneticKernel = (
+  kernel: GeneratedKernel,
+  config?: Partial<OntogenesisConfig>
+): OntogeneticKernel => OntogenesisEngine.initialize(kernel, config);
+
+/**
+ * Self-generate new kernel from parent
+ */
+export const selfGenerate = (parent: OntogeneticKernel): OntogeneticKernel =>
+  OntogenesisEngine.selfGenerate(parent);
+
+/**
+ * Self-optimize kernel
+ */
+export const selfOptimize = (
+  kernel: OntogeneticKernel,
+  iterations?: number
+): OntogeneticKernel => OntogenesisEngine.selfOptimize(kernel, iterations);
+
+/**
+ * Self-reproduce kernels
+ */
+export const selfReproduce = (
+  parent1: OntogeneticKernel,
+  parent2: OntogeneticKernel,
+  method?: 'crossover' | 'mutation' | 'cloning'
+) => OntogenesisEngine.selfReproduce(parent1, parent2, method);
+
+/**
+ * Run complete ontogenesis evolution
+ */
+export const runOntogenesis = (
+  config: OntogenesisConfig
+): KernelPopulation[] => OntogenesisEngine.runOntogenesis(config);
